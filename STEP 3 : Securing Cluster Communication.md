@@ -62,3 +62,17 @@ openssl x509 -req -in admin.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out ad
 ```
 <img width="930" height="215" alt="image" src="https://github.com/user-attachments/assets/02932cde-13eb-4270-8b88-59a97dab0aab" />
 Note that the admin user is part of the system:masters group. This is how we are able to perform any administrative operations on Kubernetes cluster using kubectl utility. The admin.crt and admin.key file gives you administrative access. We will configure these to be used with the kubectl tool to perform administrative functions on Kubernetes.
+
+
+#### The Controller Manager Client Certificate
+Generate the kube-controller-manager client certificate and private key:
+```bash
+openssl genrsa -out kube-controller-manager.key 2048
+
+openssl req -new -key kube-controller-manager.key \
+  -subj "/CN=system:kube-controller-manager/O=system:kube-controller-manager" -out kube-controller-manager.csr
+
+openssl x509 -req -in kube-controller-manager.csr \
+  -CA ca.crt -CAkey ca.key -CAcreateserial -out kube-controller-manager.crt -days 1000
+```
+<img width="847" height="131" alt="image" src="https://github.com/user-attachments/assets/561886bc-0b35-4f7c-a35f-ad2928f3dda7" />
