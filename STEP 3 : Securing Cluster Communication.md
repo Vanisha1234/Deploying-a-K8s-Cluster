@@ -46,3 +46,19 @@ openssl x509 -req -in ca.csr -signkey ca.key -CAcreateserial -out ca.crt -days 1
 <img width="937" height="188" alt="image" src="https://github.com/user-attachments/assets/1eab688b-ac1f-4abe-9368-d3911a274483" />
 The ca.crt is the Kubernetes Certificate Authority certificate and ca.key is the Kubernetes Certificate Authority private key, which will be used by the CA for signing certificates.
 
+### Client and Server Certificates
+We will generate client and server certificates for each Kubernetes component and a client certificate for the Kubernetes admin user.
+#### The Admin Client Certificate
+Generate the admin client certificate and private key:
+```bash
+# Generate private key for admin user
+openssl genrsa -out admin.key 2048
+
+# Generate CSR for admin user. Note the OU.
+openssl req -new -key admin.key -subj "/CN=admin/O=system:masters" -out admin.csr
+
+# Sign certificate for admin user using CA servers private key
+openssl x509 -req -in admin.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out admin.crt -days 1000
+```
+<img width="930" height="215" alt="image" src="https://github.com/user-attachments/assets/02932cde-13eb-4270-8b88-59a97dab0aab" />
+Note that the admin user is part of the system:masters group. This is how we are able to perform any administrative operations on Kubernetes cluster using kubectl utility. The admin.crt and admin.key file gives you administrative access. We will configure these to be used with the kubectl tool to perform administrative functions on Kubernetes.
