@@ -89,3 +89,16 @@ openssl x509 -req -in kube-proxy.csr \
   -CA ca.crt -CAkey ca.key -CAcreateserial -out kube-proxy.crt -days 1000
 ```
 <img width="974" height="152" alt="image" src="https://github.com/user-attachments/assets/3426d423-930d-4c06-bce2-1c8413fa2c5d" />
+
+#### The Scheduler Client Certificate
+Generate the kube-scheduler client certificate and private key:
+```bash
+openssl genrsa -out kube-scheduler.key 2048
+
+openssl req -new -key kube-scheduler.key \
+  -subj "/CN=system:kube-scheduler/O=system:kube-scheduler" -out kube-scheduler.csr
+
+openssl x509 -req -in kube-scheduler.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out kube-scheduler.crt -days 1000
+```
+<img width="836" height="173" alt="image" src="https://github.com/user-attachments/assets/84e48b41-397a-431f-a47b-a3554557ef8a" />
+
