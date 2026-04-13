@@ -76,3 +76,16 @@ openssl x509 -req -in kube-controller-manager.csr \
   -CA ca.crt -CAkey ca.key -CAcreateserial -out kube-controller-manager.crt -days 1000
 ```
 <img width="847" height="131" alt="image" src="https://github.com/user-attachments/assets/561886bc-0b35-4f7c-a35f-ad2928f3dda7" />
+
+#### The Kube Proxy Client Certificate
+Generate the kube-proxy client certificate and private key:
+```bash
+openssl genrsa -out kube-proxy.key 2048
+
+openssl req -new -key kube-proxy.key \
+  -subj "/CN=system:kube-proxy/O=system:node-proxier" -out kube-proxy.csr
+
+openssl x509 -req -in kube-proxy.csr \
+  -CA ca.crt -CAkey ca.key -CAcreateserial -out kube-proxy.crt -days 1000
+```
+<img width="974" height="152" alt="image" src="https://github.com/user-attachments/assets/3426d423-930d-4c06-bce2-1c8413fa2c5d" />
