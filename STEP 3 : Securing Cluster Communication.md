@@ -31,3 +31,18 @@ The output should look like this:
 192.168.56.30
 10.96.0.0/24
 10.96.0.1
+
+Create a CA certificate by first creating a private key, then using it to create a certificate signing request, then self-signing the new certificate with our key.
+```bash
+# Create private key for CA
+openssl genrsa -out ca.key 2048
+
+# Create CSR using the private key
+openssl req -new -key ca.key -subj "/CN=KUBERNETES-CA/O=Kubernetes" -out ca.csr
+
+# Self sign the csr using its own private key
+openssl x509 -req -in ca.csr -signkey ca.key -CAcreateserial -out ca.crt -days 1000
+```
+<img width="937" height="188" alt="image" src="https://github.com/user-attachments/assets/1eab688b-ac1f-4abe-9368-d3911a274483" />
+The ca.crt is the Kubernetes Certificate Authority certificate and ca.key is the Kubernetes Certificate Authority private key, which will be used by the CA for signing certificates.
+
