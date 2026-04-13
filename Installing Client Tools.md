@@ -18,3 +18,14 @@ Moving the public key of the master to all the VMs:
 cat >> ~/.ssh/authorized_keys <<EOF
 Content of publick key file
 EOF
+
+Install Kubectl 
+The kubectl command line utility is used to interact with the Kubernetes API Server. Hence we will be installing it on our Administratice client to perform the tasks.
+Reference: https://kubernetes.io/docs/tasks/tools/
+For Linux:
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/${ARCH}/kubectl"
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/
+Verify kubectl is installed:
+kubectl version --client
+<img width="925" height="484" alt="image" src="https://github.com/user-attachments/assets/319545cf-2beb-4981-a867-035f8e9b2122" />
