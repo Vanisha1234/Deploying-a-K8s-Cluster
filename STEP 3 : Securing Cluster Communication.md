@@ -18,3 +18,16 @@ Determine the API server’s internal IP (the .1 address of the Service CIDR) an
 SAN (Subject Alternative Name) is a field in an SSL/TLS certificate that lists all the IP addresses and domain names the certificate is valid for.
 SERVICE_CIDR=10.96.0.0/24
 API_SERVICE=$(echo $SERVICE_CIDR | awk 'BEGIN {FS="."} ; { printf("%s.%s.%s.1", $1, $2, $3) }')
+
+Check that the environment variables are set. Run the following:
+echo $CONTROL01
+echo $CONTROL02
+echo $LOADBALANCER
+echo $SERVICE_CIDR
+echo $API_SERVICE
+The output should look like this:
+192.168.56.11
+192.168.56.12
+192.168.56.30
+10.96.0.0/24
+10.96.0.1
