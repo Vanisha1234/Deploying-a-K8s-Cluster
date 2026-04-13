@@ -102,3 +102,85 @@ openssl x509 -req -in kube-scheduler.csr -CA ca.crt -CAkey ca.key -CAcreateseria
 ```
 <img width="836" height="173" alt="image" src="https://github.com/user-attachments/assets/84e48b41-397a-431f-a47b-a3554557ef8a" />
 
+#### The Kubernetes API Server Certificate
+The kube-apiserver certificate requires all names that various components may reach it to be part of the alternate names. These include the different DNS names, and IP addresses such as the controlplane servers IP address, the load balancers IP address, the kube-api service IP address etc. These provide an identity for the certificate, which is key in the SSL process for a server to prove who it is.
+The openssl command cannot take alternate names as command line parameter. So we must create a conf file for it:
+```bash
+cat > openssl.cnf <<EOF
+[req]
+req_extensions = v3_req
+distinguished_name = req_distinguished_name
+[req_distinguished_name]
+[v3_req]
+basicConstraints = critical, CA:FALSE
+keyUsage = critical, nonRepudiation, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names
+[alt_names]
+DNS.1 = kubernetes
+DNS.2 = kubernetes.default
+DNS.3 = kubernetes.default.svc
+DNS.4 = kubernetes.default.svc.cluster
+DNS.5 = kubernetes.default.svc.cluster.local
+IP.1 = ${API_SERVICE}
+IP.2 = ${CONTROL01}
+IP.3 = ${CONTROL02}
+IP.4 = ${LOADBALANCER}
+IP.5 = 127.0.0.1
+EOF
+```
+Generate certs for kube-apiserver:
+```bash
+openssl genrsa -out kube-apiserver.key 2048
+
+openssl req -new -key kube-apiserver.key \
+  -subj "/CN=kube-apiserver/O=Kubernetes" -out kube-apiserver.csr -config openssl.cnf
+
+openssl x509 -req -in kube-apiserver.csr \
+  -CA ca.crt -CAkey ca.key -CAcreateserial -out kube-apiserver.crt -extensions v3_req -extfile openssl.cnf -days 1000
+```
+
+#### The ETCD Server Certificate
+Similarly ETCD server certificate must have addresses of all the servers part of the ETCD cluster. Similarly, this is a server certificate, which is again all about proving identity.
+
+The openssl command cannot take alternate names as command line parameter. So we must create a conf file for it:
+```bash
+cat > openssl-etcd.cnf <<EOF
+[req]
+req_extensions = v3_req
+distinguished_name = req_distinguished_name
+[req_distinguished_name]
+[ v3_req ]
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+subjectAltName = @alt_names
+[alt_names]
+IP.1 = ${CONTROL01}
+IP.2 = ${CONTROL02}
+IP.3 = 127.0.0.1
+EOF
+```
+Generates certs for ETCD:
+```bash
+openssl genrsa -out etcd-server.key 2048
+
+openssl req -new -key etcd-server.key \
+  -subj "/CN=etcd-server/O=Kubernetes" -out etcd-server.csr -config openssl-etcd.cnf
+
+openssl x509 -req -in etcd-server.csr \
+  -CA ca.crt -CAkey ca.key -CAcreateserial -out etcd-server.crt -extensions v3_req -extfile openssl-etcd.cnf -days 1000
+```
+
+#### The Service Account Key Pair
+The Kubernetes Controller Manager leverages a key pair to generate and sign service account tokens as described in the managing service accounts documentation.
+
+Generate the service-account certificate and private key:
+```bash
+openssl genrsa -out service-account.key 2048
+
+openssl req -new -key service-account.key \
+  -subj "/CN=service-accounts/O=Kubernetes" -out service-account.csr
+
+openssl x509 -req -in service-account.csr \
+  -CA ca.crt -CAkey ca.key -CAcreateserial -out service-account.crt -days 1000
+```
